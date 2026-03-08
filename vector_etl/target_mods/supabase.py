@@ -52,6 +52,4 @@ class SupabaseTarget(BaseTarget):
 
         self.collection.upsert(records=data)
 
-        self.collection.create_index()
-
         logger.info("Completed writing embeddings to Supabase.")

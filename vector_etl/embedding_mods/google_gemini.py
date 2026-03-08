@@ -1,6 +1,7 @@
 from google import genai
 from google.genai import types
 import logging
+import numpy as np
 from .base import BaseEmbedding
 
 logging.basicConfig(level=logging.INFO)
@@ -26,7 +27,13 @@ class GoogleGeminiEmbedding(BaseEmbedding):
         )
 
         embeddings = [item.values for item in response.embeddings]
-        df['embeddings'] = embeddings
+
+        # Normalize embeddings since output_dimensionality is 1536 (not 3072)
+        embeddings_np = np.array(embeddings)
+        norms = np.linalg.norm(embeddings_np, axis=1, keepdims=True)
+        normalized_embeddings = embeddings_np / norms
+        
+        df['embeddings'] = normalized_embeddings.tolist()
 
         logger.info("Completed Google Gemini embedding process.")
         return df
