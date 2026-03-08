@@ -34,11 +34,8 @@ class SupabaseTarget(BaseTarget):
 
     def write_data(self, df, columns, domain=None):
         logger.info("Writing embeddings to Supabase...")
-        if self.vx is None:
-            self.connect()
-
-        index_name = self.config["index_name"]
-        docs = self.vx.get_or_create_collection(name=index_name, dimension=len(df['embeddings'].iat[0]))
+        if self.collection is None:
+            self.create_index_if_not_exists(dimension=len(df['embeddings'].iat[0]))
 
         data = []
         for _, row in df.iterrows():
@@ -53,5 +50,8 @@ class SupabaseTarget(BaseTarget):
 
             data.append((str(row["df_uuid"]), row["embeddings"], metadata))
 
-        docs.upsert(records=data)
+        self.collection.upsert(records=data)
+
+        self.collection.create_index()
+
         logger.info("Completed writing embeddings to Supabase.")

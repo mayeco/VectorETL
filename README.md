@@ -11,6 +11,7 @@
 Why I forked:
  - Supabase update python vecs library
  - GoogleGenAI new Python SDK
+ - Use langchain_text_splitters for chunking
 
 VectorETL by [mayeco](https://github.com/mayeco) originally forked from VectorETL by [Scoutflo](https://www.scoutflo.com/) originally forked from [Context Data](https://contextdata.ai) 's [VectorETL](https://github.com/ContextData/VectorETL)  is a modular framework designed to help **Data & AI engineers process data for their AI applications in just a few minutes!**
 

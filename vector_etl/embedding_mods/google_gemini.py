@@ -1,5 +1,5 @@
 from google import genai
-import pandas as pd
+from google.genai import types
 import logging
 from .base import BaseEmbedding
 
@@ -18,7 +18,11 @@ class GoogleGeminiEmbedding(BaseEmbedding):
 
         response = self.client.models.embed_content(
             model=self.config['model_name'],
-            contents=text_data
+            contents=text_data,
+            config=types.EmbedContentConfig(
+                output_dimensionality=1536,
+                task_type="RETRIEVAL_DOCUMENT",
+            )
         )
 
         embeddings = [item.values for item in response.embeddings]
