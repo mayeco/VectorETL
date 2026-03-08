@@ -21,7 +21,7 @@ snowflake-connector-python
 stripe
 vecs
 simple-salesforce
-google-generativeai
+google-genai
 anthropic
 pympler
 unstructured[all-docs]
