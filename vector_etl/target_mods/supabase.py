@@ -26,12 +26,15 @@ class SupabaseTarget(BaseTarget):
 
         index_name = self.config["index_name"]
         try:
-            self.collection = self.vx.get_or_create_collection(name=index_name)
+            self.collection = self.vx.get_or_create_collection(
+                name=index_name,
+                dimension=dimension
+            )
         except Exception:
             logger.info(f"Creating Supabase collection: {index_name}")
             self.collection = self.vx.get_or_create_collection(
                 name=index_name,
-                dimension=dimension#self.config.get("dimension", 1536)
+                dimension=dimension
             )
 
     def update_vector_size(self, table_name, vector_size):
@@ -56,11 +59,11 @@ class SupabaseTarget(BaseTarget):
     def write_data(self, df, columns, domain=None):
         logger.info("Writing embeddings to Supabase...")
         if self.vx is None:
-            self.create_index_if_not_exists(len(df['embeddings'].iat[0]))
+            self.connect()
 
         index_name = self.config["index_name"]
-        self.update_vector_size(index_name, len(df['embeddings'].iat[0]))
-        docs = self.vx.get_or_create_collection(name=index_name)
+        # self.update_vector_size(index_name, len(df['embeddings'].iat[0]))
+        docs = self.vx.get_or_create_collection(name=index_name, dimension=len(df['embeddings'].iat[0]))
 
         data = []
         for _, row in df.iterrows():
