@@ -45,7 +45,7 @@ class SupabaseTarget(BaseTarget):
             metadata = {
                 col: str(row[col]) if isinstance(row[col], list) else str(row[col])
                 for col in df.columns
-                if col not in ["df_uuid", "embeddings"] and pd.notna(row[col])
+                if col not in ["df_uuid", "embeddings"] and (col not in columns or col == "__concat_final") and pd.notna(row[col])
             }
 
             if domain:
