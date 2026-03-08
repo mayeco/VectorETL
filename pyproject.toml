@@ -61,6 +61,7 @@ dependencies = [
    "pygithub>=2.8.1",
    "google-genai>=1.66.0",
    "chromadb>=1.5.2",
+   "langchain-text-splitters>=1.1.1",
 ]
 dynamic = ["version"]
 

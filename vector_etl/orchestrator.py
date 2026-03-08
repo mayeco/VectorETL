@@ -4,6 +4,7 @@ import uuid
 from vector_etl.source_mods import get_source_class
 from vector_etl.embedding_mods import get_embedding_model
 from vector_etl.target_mods import get_target_database
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -101,23 +102,29 @@ class ETLOrchestrator:
         return df
 
     def split_dataframe_column(self, df, chunk_size, chunk_overlap):
-        logger.info("Splitting dataframe into chunks...")
+        logger.info("Splitting dataframe into chunks using LangChain...")
 
-        def split_text(text, size, overlap):
-            if not isinstance(text, str):
-                return []
-            return [text[i:i + size] for i in range(0, len(text), size - overlap) if text[i:i + size]]
+        text_splitter = RecursiveCharacterTextSplitter(
+            chunk_size=chunk_size,
+            chunk_overlap=chunk_overlap
+        )
 
         new_rows = []
         for _, row in df.iterrows():
-            original_id = row['df_uuid']  
-            chunks = split_text(row['__concat_final'], chunk_size, chunk_overlap)
+            original_id = row['df_uuid']
+            text = row['__concat_final']
+
+            if not isinstance(text, str):
+                continue
+
+            chunks = text_splitter.split_text(text)
+
             for chunk in chunks:
                 if chunk:
                     new_row = row.copy()
                     new_row['__concat_final'] = chunk
-                    new_row['original_id'] = original_id  
-                    new_row['df_uuid'] = str(uuid.uuid4()) 
+                    new_row['original_id'] = original_id
+                    new_row['df_uuid'] = str(uuid.uuid4())
                     new_rows.append(new_row)
 
         return pd.DataFrame(new_rows, columns=df.columns)
