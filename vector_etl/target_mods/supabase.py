@@ -26,10 +26,10 @@ class SupabaseTarget(BaseTarget):
 
         index_name = self.config["index_name"]
         try:
-            self.collection = self.vx.get_collection(name=index_name)
+            self.collection = self.vx.get_or_create_collection(name=index_name)
         except Exception:
             logger.info(f"Creating Supabase collection: {index_name}")
-            self.collection = self.vx.create_collection(
+            self.collection = self.vx.get_or_create_collection(
                 name=index_name,
                 dimension=dimension#self.config.get("dimension", 1536)
             )
@@ -60,7 +60,7 @@ class SupabaseTarget(BaseTarget):
 
         index_name = self.config["index_name"]
         self.update_vector_size(index_name, len(df['embeddings'].iat[0]))
-        docs = self.vx.get_collection(name=index_name)
+        docs = self.vx.get_or_create_collection(name=index_name)
 
         data = []
         for _, row in df.iterrows():
