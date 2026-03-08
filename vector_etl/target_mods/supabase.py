@@ -1,8 +1,6 @@
 import logging
 import pandas as pd
 import vecs
-from urllib.parse import urlparse
-import psycopg2
 from .base import BaseTarget
 
 logging.basicConfig(level=logging.INFO)
@@ -31,30 +29,8 @@ class SupabaseTarget(BaseTarget):
                 dimension=dimension
             )
         except Exception:
-            logger.info(f"Creating Supabase collection: {index_name}")
-            self.collection = self.vx.get_or_create_collection(
-                name=index_name,
-                dimension=dimension
-            )
-
-    def update_vector_size(self, table_name, vector_size):
-        pg_uri = urlparse(self.config["supabase_uri"])
-        connection = psycopg2.connect(
-            database=pg_uri.path[1:],
-            user=pg_uri.username,
-            password=pg_uri.password,
-            host=pg_uri.hostname,
-            port=pg_uri.port
-        )
-
-        sql = f"""
-        ALTER TABLE vecs.{table_name}
-        ALTER COLUMN vec TYPE vector({vector_size});
-        """
-        with connection.cursor() as cursor:
-            cursor.execute(sql)
-        connection.commit()
-        connection.close()
+            logger.error(f"Failed to create or access collection '{index_name}' in Supabase.")
+            raise
 
     def write_data(self, df, columns, domain=None):
         logger.info("Writing embeddings to Supabase...")
@@ -62,29 +38,20 @@ class SupabaseTarget(BaseTarget):
             self.connect()
 
         index_name = self.config["index_name"]
-        # self.update_vector_size(index_name, len(df['embeddings'].iat[0]))
         docs = self.vx.get_or_create_collection(name=index_name, dimension=len(df['embeddings'].iat[0]))
 
         data = []
         for _, row in df.iterrows():
-            if len(columns) > 0:
-                columns.append("__concat_final")
-                metadata = {col: str(row[col]) for col in columns}
+            metadata = {
+                col: str(row[col]) if isinstance(row[col], list) else str(row[col])
+                for col in df.columns
+                if col not in ["df_uuid", "embeddings"] and pd.notna(row[col])
+            }
 
-                if domain:
-                    metadata["domain"] = domain
+            if domain:
+                metadata["domain"] = domain
 
-                data.append((str(row["df_uuid"]), row["embeddings"], metadata))
-            else:
-                metadata = {
-                    col: str(row[col]) if isinstance(row[col], list) else str(row[col])
-                    for col in df.columns if
-                    col not in ["df_uuid", "embeddings"] and pd.notna(row[col])
-                }
-                if domain:
-                    metadata["domain"] = domain
-
-                data.append((str(row["df_uuid"]), row["embeddings"], metadata))
+            data.append((str(row["df_uuid"]), row["embeddings"], metadata))
 
         docs.upsert(records=data)
         logger.info("Completed writing embeddings to Supabase.")

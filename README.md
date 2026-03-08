@@ -8,7 +8,11 @@
   <p>VectorETL: Lightweight ETL Framework for Vector Databases</p>
 </h2>
 
-VectorETL by [Scoutflo](https://www.scoutflo.com/) originally forked from [Context Data](https://contextdata.ai) 's [VectorETL](https://github.com/ContextData/VectorETL)  is a modular framework designed to help **Data & AI engineers process data for their AI applications in just a few minutes!**
+Why I forked:
+ - Supabase update python vecs library
+ - GoogleGenAI new Python SDK
+
+VectorETL by [mayeco](https://github.com/mayeco) originally forked from VectorETL by [Scoutflo](https://www.scoutflo.com/) originally forked from [Context Data](https://contextdata.ai) 's [VectorETL](https://github.com/ContextData/VectorETL)  is a modular framework designed to help **Data & AI engineers process data for their AI applications in just a few minutes!**
 
 VectorETL streamlines the process of converting diverse data sources into vector embeddings and storing them in various vector databases. It supports multiple data sources (databases, cloud storage, and local files), various embedding models (including OpenAI, Cohere, and Google Gemini), and several vector database targets (like Pinecone, Qdrant, and Weaviate).
 
